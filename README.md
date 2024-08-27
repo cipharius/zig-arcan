@@ -1,7 +1,7 @@
-# Zig build for arcan libraries
+# Zig build for Arcan libraries
 
 Build and use arcan libraries using Zig.
 
 ## Dependencies
 
-* Zig 0.12.0-dev.1664+8ca4a5240
+* Zig 0.13.0
