@@ -3,6 +3,7 @@
     .version = "0.1.0-3a8c742cba",
     .minimum_zig_version = "0.13.0",
     .paths = .{
+        "src",
         "build.zig",
         "build.zig.zon",
         "README.md",
