@@ -114,6 +114,23 @@ pub fn build(b: *std.Build) void {
     arcan_tui.linkLibrary(arcan_shmif);
     arcan_tui.root_module.addCMacro("PLATFORM_HEADER", platform_header);
     b.installArtifact(arcan_tui);
+
+    const arcan_raw_api = b.addTranslateC(.{
+        .root_source_file = b.path("src/c_api.h"),
+        .target = target,
+        .optimize = optimize,
+    });
+    arcan_raw_api.defineCMacroRaw(b.fmt("PLATFORM_HEADER={s}", .{platform_header}));
+    inline for (shmif_include_paths) |dir| {
+        arcan_raw_api.addIncludeDir(arcan_src.path(dir).getPath(b));
+    }
+    inline for (a12_include_paths) |dir| {
+        arcan_raw_api.addIncludeDir(arcan_src.path(dir).getPath(b));
+    }
+    inline for (shmif_tui_include_paths) |dir| {
+        arcan_raw_api.addIncludeDir(arcan_src.path(dir).getPath(b));
+    }
+    _ = arcan_raw_api.addModule("arcan_raw");
 }
 
 const shmif_sources = [_][]const u8{
