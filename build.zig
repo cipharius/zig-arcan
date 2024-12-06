@@ -24,6 +24,23 @@ pub fn build(b: *std.Build) void {
     const platform_header_path = arcan_src.path("./src/platform/platform.h").getPath(b);
     const platform_header = b.fmt("\"{s}\"", .{platform_header_path});
 
+    const arcan_raw_api = b.addTranslateC(.{
+        .root_source_file = b.path("src/c_api.h"),
+        .target = target,
+        .optimize = optimize,
+    });
+    arcan_raw_api.defineCMacroRaw(b.fmt("PLATFORM_HEADER={s}", .{platform_header}));
+    inline for (shmif_include_paths) |dir| {
+        arcan_raw_api.addIncludeDir(arcan_src.path(dir).getPath(b));
+    }
+    inline for (a12_include_paths) |dir| {
+        arcan_raw_api.addIncludeDir(arcan_src.path(dir).getPath(b));
+    }
+    inline for (shmif_tui_include_paths) |dir| {
+        arcan_raw_api.addIncludeDir(arcan_src.path(dir).getPath(b));
+    }
+    const arcan_raw_module = arcan_raw_api.addModule("arcan_raw");
+
     const arcan_shmif_server = if (static_build)
         b.addStaticLibrary(.{
             .name = "arcan_shmif_server",
@@ -115,22 +132,6 @@ pub fn build(b: *std.Build) void {
     arcan_tui.root_module.addCMacro("PLATFORM_HEADER", platform_header);
     b.installArtifact(arcan_tui);
 
-    const arcan_raw_api = b.addTranslateC(.{
-        .root_source_file = b.path("src/c_api.h"),
-        .target = target,
-        .optimize = optimize,
-    });
-    arcan_raw_api.defineCMacroRaw(b.fmt("PLATFORM_HEADER={s}", .{platform_header}));
-    inline for (shmif_include_paths) |dir| {
-        arcan_raw_api.addIncludeDir(arcan_src.path(dir).getPath(b));
-    }
-    inline for (a12_include_paths) |dir| {
-        arcan_raw_api.addIncludeDir(arcan_src.path(dir).getPath(b));
-    }
-    inline for (shmif_tui_include_paths) |dir| {
-        arcan_raw_api.addIncludeDir(arcan_src.path(dir).getPath(b));
-    }
-    _ = arcan_raw_api.addModule("arcan_raw");
 }
 
 const shmif_sources = [_][]const u8{
@@ -233,6 +234,7 @@ const a12_external_sources = [_][]const u8{
     "src/a12/external/blake3/blake3_dispatch.c",
     "src/a12/external/blake3/blake3_portable.c",
     "src/a12/external/x25519.c",
+    "src/a12/external/fts.c",
 
     "src/a12/external/zstd/common/debug.c",
     "src/a12/external/zstd/common/entropy_common.c",
@@ -275,6 +277,13 @@ const a12_headers = [_][2][]const u8{
     .{ "src/a12/a12_decode.h", "a12_decode.h" },
     .{ "src/a12/a12_encode.h", "a12_encode.h" },
 };
+const a12_definitions = [_][2][]const u8{
+    .{ "BLAKE3_NO_AVX2", "" },
+    .{ "BLAKE3_NO_AVX512", "" },
+    .{ "BLAKE3_NO_SSE41", "" },
+    .{ "ZSTD_MULTITHREAD", "" },
+    .{ "ZSTD_DISABLE_ASM", "" },
+};
 
 fn setupA12Step(step: *std.Build.Step.Compile, arcan_src: *std.Build.Dependency) void {
     step.linkLibC();
@@ -282,14 +291,14 @@ fn setupA12Step(step: *std.Build.Step.Compile, arcan_src: *std.Build.Dependency)
     inline for (a12_sources) |source| {
         step.addCSourceFile(.{
             .file = arcan_src.path(source),
-            .flags = &flags,
+            .flags = &.{"-fPIC"},
         });
     }
 
     inline for (a12_external_sources) |source| {
         step.addCSourceFile(.{
             .file = arcan_src.path(source),
-            .flags = &flags,
+            .flags = &.{"-fPIC"},
         });
     }
 
@@ -301,13 +310,9 @@ fn setupA12Step(step: *std.Build.Step.Compile, arcan_src: *std.Build.Dependency)
         step.installHeader(arcan_src.path(header[0]), header[1]);
     }
 
-    step.root_module.addCMacro("BLAKE3_NO_AVX2", "");
-    step.root_module.addCMacro("BLAKE3_NO_AVX512", "");
-    step.root_module.addCMacro("BLAKE3_NO_SSE41", "");
-    step.root_module.addCMacro("ZSTD_MULTITHREAD", "");
-    step.root_module.addCMacro("ZSTD_DISABLE_ASM", "");
-    step.root_module.addCMacro("SHMIFSRV_EXTERNAL_CLOCK", "");
-    step.root_module.addCMacro("PLATFORM_FRAMSERVER_NOAMEM", "");
+    inline for (a12_definitions) |definition| {
+        step.root_module.addCMacro(definition[0], definition[1]);
+    }
 
     addPlatformDefinitions(step);
 }
