@@ -39,7 +39,7 @@ pub fn build(b: *std.Build) void {
     inline for (shmif_tui_include_paths) |dir| {
         arcan_raw_api.addIncludeDir(arcan_src.path(dir).getPath(b));
     }
-    const arcan_raw_module = arcan_raw_api.addModule("arcan_raw");
+    _ = arcan_raw_api.addModule("arcan_raw");
 
     const arcan_shmif_server = if (static_build)
         b.addStaticLibrary(.{
