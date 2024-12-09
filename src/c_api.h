@@ -14,3 +14,6 @@
 #include "arcan_tui_readline.h"
 
 #include "a12.h"
+#ifdef A12_DEBUG
+#include "a12_int.h"
+#endif

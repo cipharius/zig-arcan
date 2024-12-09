@@ -19,6 +19,7 @@ pub fn build(b: *std.Build) void {
 
     const static_build = b.option(bool, "static", "Build static libraries (default: true)") orelse true;
     const with_debugif = b.option(bool, "with_debugif", "Build with shmif debugif (default: false)") orelse false;
+    const a12_debug = b.option(bool, "a12_debug", "Build with extra a12 debug information (default: false)") orelse false;
 
     const arcan_src = b.dependency("arcan_src", .{});
     const platform_header_path = arcan_src.path("./src/platform/platform.h").getPath(b);
@@ -30,6 +31,9 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
     arcan_raw_api.defineCMacroRaw(b.fmt("PLATFORM_HEADER={s}", .{platform_header}));
+    if (a12_debug) {
+        arcan_raw_api.defineCMacroRaw("A12_DEBUG");
+    }
     inline for (shmif_include_paths) |dir| {
         arcan_raw_api.addIncludeDir(arcan_src.path(dir).getPath(b));
     }
