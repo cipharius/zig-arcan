@@ -1,6 +1,6 @@
 .{
     .name = "zig-arcan",
-    .version = "0.1.0-2d840ea172",
+    .version = "0.1.0-b250514c62",
     .minimum_zig_version = "0.13.0",
     .paths = .{
         "src",
@@ -11,8 +11,8 @@
     },
     .dependencies = .{
         .arcan_src = .{
-            .url = "https://github.com/letoram/arcan/archive/2d840ea172fb387db263e1df54693b48235d79a6.tar.gz",
-            .hash = "122023f13f177f932ad33d2247bfe0f6887287286601967a8a3124a29be9a3d20a45",
+            .url = "https://github.com/letoram/arcan/archive/b250514c62810a8bcccd6a0b95de96be4c5e4dc5.tar.gz",
+            .hash = "1220cc08f10ac14a98502d6ba18c01298a4918f9b1726cab48ffc0115a27e90d0505",
         },
     },
 }
