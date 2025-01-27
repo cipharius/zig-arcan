@@ -430,7 +430,7 @@ fn addShmifPlatformSources(
                 });
             }
         },
-        else => @panic("attempted to build arcan-shmif on an unsupported OS/platform"),
+        else => {},
     }
 }
 
